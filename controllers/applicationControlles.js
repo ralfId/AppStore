@@ -5,14 +5,7 @@ const AppScore = require('../models/appScore');
 const AverageRating = require('../models/averageRating');
 const Category = require('../models/category');
 
-// const getAllApps = async (req = request, res = response)=>{
-// try {
 
-// } catch (error) {
-//     console.log(error)
-//     return res.status(500).json({ msg: 'internal server error' });
-// }
-// }
 
 const getAllApps = async (req = request, res = response) => {
     try {
@@ -95,6 +88,26 @@ const deleteApp = async (req = request, res = response) => {
     }
 }
 
+const installedApp = async (req = request, res = response) => {
+    const { id } = req.params;
+
+    try {
+        const app = await Application.findByPk(id);
+
+        if (!app.state) {
+            return res.status(400).json({ msg: 'app not exist or is already deleted' });
+        }
+
+        let newInstall = app.numberInstallations += 1;
+        app.update({ numberInstallations: newInstall, isInstalled: true });
+
+        return res.json({ data: app });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ msg: 'internal server error' });
+    }
+}
 
 
 
@@ -107,6 +120,7 @@ const seedDB = async (req = request, res = response) => {
         // await seedComments();
         // await seedAppScores();
         // await seedAverageRating();
+        // await updateAppsAverage();
 
         return res.json({ msg: 'data base has data' });
 
@@ -223,64 +237,55 @@ const seedAppScores = async () => {
     }
 }
 
-//TODO: crear el promedio de calificacion por app
+
 const seedAverageRating = async () => {
     try {
         const allApps = await Application.findAll();
         let AverageRatingArr = [];
-        let appTotalScore = 0;
 
-        // allApps.forEach(async app => {
-        //     let AppScores = await AppScore.findAll({ where: id = app.id });
+        for (let index = 0; index < allApps.length; index++) {
+            let AppScores = await AppScore.findAll({ where: { appId: allApps[index].id } });
 
-        //     console.log('apps score')
-        //     console.log(AppScores)
-        // });
-        const AppScores = await AppScore.findAll({ where: id = 1 });
-        console.log('cantidad de score')
-        console.log(AppScores)
-        //AppScores.forEach( (app) => appTotalScore += app.score);
-        for (let index = 0; index < AppScores.length; index++) {
-            // appTotalScore += AppScores[index]
-            AverageRatingArr.push(AppScores[index].score);
+            let appScore = 0;
+            for (let indexScore = 0; indexScore < AppScores.length; indexScore++) {
+                appScore += AppScores[indexScore].score;
 
+            }
+
+            let data = {
+                appId: allApps[index].id,
+                average: Math.floor(appScore / AppScores.length).toFixed(1),
+                state: true,
+            }
+
+            AverageRatingArr.push(data);
         }
-        console.log(AverageRatingArr)
-        // console.log('apps score')
-        // console.log(appTotalScore)
-
-        // allApps.forEach(async (app) => {
-
-        //     let AppScores = await AppScore.findAll({ where: app.id });
-
-        //     AppScores.forEach(element => {
-        //         appTotalScore += element.score;
-        //     });
-
-        //     let data = {
-        //         appId: app.id,
-        //         average: Math.round(appTotalScore / AppScores.length),
-        //         state: true,
-        //     }
-        //     AverageRatingArr.push(data);
-        //     appTotalScore = 0;
-        //     AppScores = [];
-        // });
-        // console.log('array de promedios')
-        // console.log(AverageRatingArr)
-
-
-        //await AverageRating.bulkCreate(AverageRatingArr);
-
+        await AverageRating.bulkCreate(AverageRatingArr);
 
     } catch (error) {
         console.log(error);
     }
 }
+
+const updateAppsAverage = async () => {
+    try {
+        const allApps = await Application.findAll();
+
+        for (let index = 0; index < allApps.length; index++) {
+             let rating = await AverageRating.findByPk(allApps[index].id);
+             allApps[index].average = rating.average;
+             allApps[index].save();
+           
+        }
+    } catch (error) {
+        console.log(error);
+    }
+}
+
 module.exports = {
     getAllApps,
-    //seedDB,
+    seedDB,
     getAppById,
     getAppByCategory,
-    deleteApp
+    deleteApp, installedApp
 }

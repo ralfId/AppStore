@@ -10,7 +10,7 @@ const AverageRating = db.define('AverageRating', {
         type: DataTypes.INTEGER,
     },
     average: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DECIMAL,
     },
     state: {
         type: DataTypes.BOOLEAN,

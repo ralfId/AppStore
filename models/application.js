@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const db = require("../db/connection");
+const AverageRating = require('./averageRating');
 const Category = require('./category');
 
 const Application = db.define('App', {
@@ -30,13 +31,17 @@ const Application = db.define('App', {
     },
     categoryId: {
         type: DataTypes.INTEGER,
-
     },
     isInstalled: {
         type: DataTypes.BOOLEAN,
+    },
+    numberInstallations: {
+        type: DataTypes.NUMBER,
+    },
+    average: {
+        type: DataTypes.DECIMAL,
     }
 });
 
-Application.hasOne(Category, { foreignKey: 'id' });
 
 module.exports = Application;

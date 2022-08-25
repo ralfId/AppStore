@@ -21,6 +21,5 @@ const Category = db.define('Category', {
     }
 });
 
-// Category.hasMany(Application, {foreignKey: 'id'});
 
 module.exports = Category;
