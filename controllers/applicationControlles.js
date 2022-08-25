@@ -16,7 +16,7 @@ const Category = require('../models/category');
 
 const getAllApps = async (req = request, res = response) => {
     try {
-        const allApps = await Application.findAll();
+        const allApps = await Application.findAll({ where: { state: true } });
 
         if (!allApps) {
             return res.status(400).json({ msg: 'There is no apps' });
@@ -47,7 +47,6 @@ const getAppById = async (req = request, res = response) => {
         return res.status(500).json({ msg: 'internal server error' });
     }
 }
-//TODO: obtener app por categoria
 
 const getAppByCategory = async (req = request, res = response) => {
     const { id } = req.params;
@@ -74,6 +73,31 @@ const getAppByCategory = async (req = request, res = response) => {
         return res.status(500).json({ msg: 'internal server error' });
     }
 }
+
+const deleteApp = async (req = request, res = response) => {
+    const { id } = req.params;
+
+    try {
+        const app = await Application.findByPk(id);
+
+        if (!app) {
+            return res.status(400).json({ msg: 'app not exist or is already deleted' });
+        }
+
+        app.state = false;
+        app.save();
+
+        return res.json({ data: app });
+
+    } catch (error) {
+        console.log(error)
+        return res.status(500).json({ msg: 'internal server error' });
+    }
+}
+
+
+
+
 
 const seedDB = async (req = request, res = response) => {
     try {
@@ -258,4 +282,5 @@ module.exports = {
     //seedDB,
     getAppById,
     getAppByCategory,
+    deleteApp
 }

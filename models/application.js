@@ -31,6 +31,9 @@ const Application = db.define('App', {
     categoryId: {
         type: DataTypes.INTEGER,
 
+    },
+    isInstalled: {
+        type: DataTypes.BOOLEAN,
     }
 });
 
